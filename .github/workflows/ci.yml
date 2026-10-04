@@ -1,0 +1,62 @@
+name: Infrastructure CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  terraform:
+    name: Terraform Validation
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.9.8
+
+      - name: Check Terraform formatting
+        run: terraform fmt -check -recursive
+
+      - name: Initialize bootstrap configuration
+        working-directory: bootstrap
+        run: terraform init -backend=false
+
+      - name: Validate bootstrap configuration
+        working-directory: bootstrap
+        run: terraform validate
+
+      - name: Initialize EKS configuration
+        working-directory: terraform
+        run: terraform init -backend=false
+
+      - name: Validate EKS configuration
+        working-directory: terraform
+        run: terraform validate
+
+  helm:
+    name: Helm Validation
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Helm
+        uses: azure/setup-helm@v4
+
+      - name: Lint Helm chart
+        run: helm lint helm/application
+
+      - name: Render Kubernetes manifests
+        run: helm template cloud-platform-app helm/application

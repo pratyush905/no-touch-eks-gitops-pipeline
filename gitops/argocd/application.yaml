@@ -1,0 +1,27 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: cloud-platform-app
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+
+  source:
+    repoURL: https://github.com/hemantsharma2189/aws-eks-terraform-gitops-platform.git
+    targetRevision: main
+    path: helm/application
+    helm:
+      releaseName: cloud-platform-app
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: cloud-platform
+
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

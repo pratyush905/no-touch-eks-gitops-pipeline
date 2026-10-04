@@ -1,0 +1,6 @@
+apiVersion: v2
+name: cloud-platform-app
+description: Production-style Helm chart for the AWS EKS GitOps platform
+type: application
+version: 0.1.0
+appVersion: "1.0.0"
